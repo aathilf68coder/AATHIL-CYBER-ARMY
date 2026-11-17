@@ -1,0 +1,160 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    // Default-deny safety net
+    match /{document=**} {
+      allow read, write: if false;
+    }
+
+    function isSignedIn() {
+      return request.auth != null;
+    }
+
+    function isOwner(userId) {
+      return isSignedIn() && request.auth.uid == userId;
+    }
+
+    function isValidId(id) {
+      return id is string && id.size() >= 1 && id.size() <= 128 && id.matches('^[a-zA-Z0-9_\\-]+$');
+    }
+
+    function incoming() {
+      return request.resource.data;
+    }
+
+    function existing() {
+      return resource.data;
+    }
+
+    function isValidCustomerRegistration(data, userId) {
+      return data.keys().hasAll([
+               'userId',
+               'customerName',
+               'mobileNumber',
+               'authorizedTarget',
+               'instagramUsername',
+               'authorizationDocName',
+               'authorizationDocUri',
+               'referenceImageNames',
+               'authorizationConfirmed',
+               'createdAt',
+               'updatedAt'
+             ]) &&
+             data.keys().hasOnly([
+               'userId',
+               'customerName',
+               'mobileNumber',
+               'authorizedTarget',
+               'instagramUsername',
+               'authorizationDocName',
+               'authorizationDocUri',
+               'referenceImageNames',
+               'authorizationConfirmed',
+               'createdAt',
+               'updatedAt'
+             ]) &&
+             data.userId is string && data.userId == userId &&
+             data.customerName is string && data.customerName.size() >= 2 && data.customerName.size() <= 100 &&
+             data.mobileNumber is string && data.mobileNumber.size() >= 6 && data.mobileNumber.size() <= 30 &&
+             data.authorizedTarget is string && data.authorizedTarget.size() >= 2 && data.authorizedTarget.size() <= 200 &&
+             data.instagramUsername is string && data.instagramUsername.size() <= 60 &&
+             data.authorizationDocName is string && data.authorizationDocName.size() >= 1 && data.authorizationDocName.size() <= 200 &&
+             data.authorizationDocUri is string && data.authorizationDocUri.size() <= 500 &&
+             data.referenceImageNames is list && data.referenceImageNames.size() <= 5 &&
+             (data.referenceImageNames.size() == 0 || (data.referenceImageNames[0] is string && data.referenceImageNames[0].size() <= 200)) &&
+             data.authorizationConfirmed is bool && data.authorizationConfirmed == true &&
+             data.createdAt is timestamp && data.createdAt <= request.time &&
+             data.updatedAt is timestamp && data.updatedAt <= request.time;
+    }
+
+    function isValidSecurityServiceOrder(data, userId) {
+      return data.keys().hasAll([
+               'userId',
+               'orderCode',
+               'sessionToken',
+               'serviceId',
+               'serviceTitle',
+               'serviceCategory',
+               'customerName',
+               'mobileNumber',
+               'authorizedTarget',
+               'instagramUsername',
+               'authorizationDocName',
+               'referenceImagesCount',
+               'status',
+               'paymentInstructionsUnlocked',
+               'createdAt',
+               'updatedAt'
+             ]) &&
+             data.keys().hasOnly([
+               'userId',
+               'orderCode',
+               'sessionToken',
+               'serviceId',
+               'serviceTitle',
+               'serviceCategory',
+               'customerName',
+               'mobileNumber',
+               'authorizedTarget',
+               'instagramUsername',
+               'authorizationDocName',
+               'referenceImagesCount',
+               'status',
+               'paymentInstructionsUnlocked',
+               'createdAt',
+               'updatedAt'
+             ]) &&
+             data.userId is string && data.userId == userId &&
+             data.orderCode is string && data.orderCode.size() >= 4 && data.orderCode.size() <= 32 &&
+             data.sessionToken is string && data.sessionToken.size() >= 4 && data.sessionToken.size() <= 32 &&
+             data.serviceId is string && data.serviceId.size() >= 1 && data.serviceId.size() <= 60 &&
+             data.serviceTitle is string && data.serviceTitle.size() >= 3 && data.serviceTitle.size() <= 120 &&
+             data.serviceCategory is string && data.serviceCategory.size() >= 2 && data.serviceCategory.size() <= 60 &&
+             data.customerName is string && data.customerName.size() >= 2 && data.customerName.size() <= 100 &&
+             data.mobileNumber is string && data.mobileNumber.size() >= 6 && data.mobileNumber.size() <= 30 &&
+             data.authorizedTarget is string && data.authorizedTarget.size() >= 2 && data.authorizedTarget.size() <= 200 &&
+             data.instagramUsername is string && data.instagramUsername.size() <= 60 &&
+             data.authorizationDocName is string && data.authorizationDocName.size() >= 1 && data.authorizationDocName.size() <= 200 &&
+             data.referenceImagesCount is int && data.referenceImagesCount >= 0 && data.referenceImagesCount <= 5 &&
+             data.status is string && data.status == 'SCOPE_AND_AUTH_CONFIRMED' &&
+             data.paymentInstructionsUnlocked is bool && data.paymentInstructionsUnlocked == true &&
+             data.createdAt is timestamp && data.createdAt <= request.time &&
+             data.updatedAt is timestamp && data.updatedAt <= request.time;
+    }
+
+    match /users/{userId}/registrations/{registrationId} {
+      allow list: if isOwner(userId);
+      allow get: if isOwner(userId) && isValidId(registrationId);
+      allow create: if isOwner(userId) &&
+                       isValidId(registrationId) &&
+                       isValidCustomerRegistration(incoming(), userId);
+      allow update: if isOwner(userId) &&
+                       isValidId(registrationId) &&
+                       isValidCustomerRegistration(incoming(), userId) &&
+                       incoming().userId == existing().userId &&
+                       incoming().createdAt == existing().createdAt &&
+                       incoming().diff(existing()).affectedKeys().hasOnly([
+                         'customerName',
+                         'mobileNumber',
+                         'authorizedTarget',
+                         'instagramUsername',
+                         'authorizationDocName',
+                         'authorizationDocUri',
+                         'referenceImageNames',
+                         'authorizationConfirmed',
+                         'updatedAt'
+                       ]);
+      allow delete: if isOwner(userId) && isValidId(registrationId);
+    }
+
+    match /users/{userId}/orders/{orderId} {
+      allow list: if isOwner(userId);
+      allow get: if isOwner(userId) && isValidId(orderId);
+      allow create: if isOwner(userId) &&
+                       isValidId(orderId) &&
+                       isValidSecurityServiceOrder(incoming(), userId);
+      allow update: if false;
+      allow delete: if isOwner(userId) && isValidId(orderId);
+    }
+  }
+}

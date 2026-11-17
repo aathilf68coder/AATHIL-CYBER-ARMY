@@ -1,0 +1,86 @@
+{
+  "entities": {
+    "CustomerRegistration": {
+      "title": "CustomerRegistration",
+      "description": "Authorized customer registration and scope document metadata stored securely per authenticated user.",
+      "type": "object",
+      "properties": {
+        "userId": { "type": "string", "description": "Firebase Auth UID of the customer." },
+        "customerName": { "type": "string", "description": "Full name of the customer." },
+        "mobileNumber": { "type": "string", "description": "Customer contact mobile number." },
+        "authorizedTarget": { "type": "string", "description": "Authorized target website, application, or handle." },
+        "instagramUsername": { "type": "string", "description": "Optional customer Instagram handle." },
+        "authorizationDocName": { "type": "string", "description": "Display filename of the uploaded authorization document." },
+        "authorizationDocUri": { "type": "string", "description": "Local document URI reference for session display." },
+        "referenceImageNames": { "type": "array", "description": "Optional list of attached reference image filenames (max 5)." },
+        "authorizationConfirmed": { "type": "boolean", "description": "Explicit written authorization confirmation flag." },
+        "createdAt": { "type": "string", "format": "date-time", "description": "Server timestamp (FieldValue.serverTimestamp())." },
+        "updatedAt": { "type": "string", "format": "date-time", "description": "Server timestamp (FieldValue.serverTimestamp())." }
+      },
+      "required": [
+        "userId",
+        "customerName",
+        "mobileNumber",
+        "authorizedTarget",
+        "instagramUsername",
+        "authorizationDocName",
+        "authorizationDocUri",
+        "referenceImageNames",
+        "authorizationConfirmed",
+        "createdAt",
+        "updatedAt"
+      ]
+    },
+    "SecurityServiceOrder": {
+      "title": "SecurityServiceOrder",
+      "description": "Confirmed cyber security audit service order with locked scope and unlocked payment instructions.",
+      "type": "object",
+      "properties": {
+        "userId": { "type": "string", "description": "Firebase Auth UID of the customer." },
+        "orderCode": { "type": "string", "description": "Unique order reference code." },
+        "sessionToken": { "type": "string", "description": "Active security session identifier at confirmation." },
+        "serviceId": { "type": "string", "description": "Identifier of the selected cyber security service." },
+        "serviceTitle": { "type": "string", "description": "Title of the selected cyber security service." },
+        "serviceCategory": { "type": "string", "description": "Audit category label." },
+        "customerName": { "type": "string", "description": "Customer name snapshot at order confirmation." },
+        "mobileNumber": { "type": "string", "description": "Customer mobile snapshot at order confirmation." },
+        "authorizedTarget": { "type": "string", "description": "Authorized target website or application." },
+        "instagramUsername": { "type": "string", "description": "Optional Instagram username snapshot." },
+        "authorizationDocName": { "type": "string", "description": "Uploaded authorization document filename." },
+        "referenceImagesCount": { "type": "integer", "description": "Count of reference images attached (0-5)." },
+        "status": { "type": "string", "enum": ["SCOPE_AND_AUTH_CONFIRMED"], "description": "Order confirmation status." },
+        "paymentInstructionsUnlocked": { "type": "boolean", "description": "True once scope and authorization are confirmed." },
+        "createdAt": { "type": "string", "format": "date-time", "description": "Server timestamp (FieldValue.serverTimestamp())." },
+        "updatedAt": { "type": "string", "format": "date-time", "description": "Server timestamp (FieldValue.serverTimestamp())." }
+      },
+      "required": [
+        "userId",
+        "orderCode",
+        "sessionToken",
+        "serviceId",
+        "serviceTitle",
+        "serviceCategory",
+        "customerName",
+        "mobileNumber",
+        "authorizedTarget",
+        "instagramUsername",
+        "authorizationDocName",
+        "referenceImagesCount",
+        "status",
+        "paymentInstructionsUnlocked",
+        "createdAt",
+        "updatedAt"
+      ]
+    }
+  },
+  "firestore": {
+    "/users/{userId}/registrations/{registrationId}": {
+      "schema": { "$ref": "#/entities/CustomerRegistration" },
+      "description": "User-isolated customer registration and authorization metadata."
+    },
+    "/users/{userId}/orders/{orderId}": {
+      "schema": { "$ref": "#/entities/SecurityServiceOrder" },
+      "description": "User-isolated confirmed cyber security service orders."
+    }
+  }
+}

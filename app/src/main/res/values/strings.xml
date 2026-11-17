@@ -1,0 +1,17 @@
+<resources>
+    <string name="app_name">Aegis Cyber</string>
+    <string name="brand_subtitle">CYBER SECURITY SERVICE CENTER</string>
+    <string name="official_instagram_handle">&#64;aathil_407</string>
+    <string name="official_instagram_url">https://instagram.com/aathil_407</string>
+    <string name="official_contact_prompt">For service enquiries and order confirmation, contact us through our official Instagram account.</string>
+    <string name="countdown_label">SECURE SESSION EXPIRES IN</string>
+    <string name="ethical_policy_notice">Strict Authorization Policy: We never access accounts, cameras, or files without explicit written authorization.</string>
+    <string name="sign_in_with_google">Sign in with Google</string>
+    <string name="nav_register">Register</string>
+    <string name="nav_services">Services</string>
+    <string name="nav_confirm">Confirm</string>
+    <string name="nav_contact">Contact</string>
+    <string name="select_service">Select Service</string>
+    <string name="confirm_order">Confirm Order</string>
+    <string name="request_new_session">Request New Session</string>
+</resources>

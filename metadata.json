@@ -1,0 +1,6 @@
+{
+  "name": "Aegis Cyber",
+  "description": "Cyber Security Service Center for authorized security audits, vulnerability assessments, and encrypted order intake.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
